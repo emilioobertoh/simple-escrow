@@ -7,7 +7,7 @@ contract Escrow {
 
     uint256 public txid = 1;
 
-    enum Status { PENDING, CONFIRMED, WITHDREW, DISPUTED, REFUNDED, RELEASED }
+    enum Status { PENDING, CONFIRMED, WITHDRAWN, DISPUTED, REFUNDED, RELEASED }
 
     struct Transaction {
         
@@ -48,12 +48,40 @@ contract Escrow {
 
     function Confirm(uint256 _id) external {
 
-        //TRANSFORM INTO A MODIFIER
-        require(msg.sender == transactions[_id].sender, "Transactions can only be confirmed by the sender");
+        //TRANSFORM INTO A MODIFIER?
+        require(
+            msg.sender == transactions[_id].sender, 
+            "Transactions can only be confirmed by the sender"
+        );
+        require(
+            transactions[_id].status == Status.PENDING,
+            "Transaction needs to be pending so it can be confirmed"
+        );
 
         transactions[_id].status = Status.CONFIRMED;
 
         //ADD EVENT FOR SENDER CONFIRMATION
+    }
+
+    function Withdraw(uint256 _id) external {
+
+        require(
+            msg.sender == transactions[_id].receiver, 
+            "Transactions can only be withdrawn by established receiver"
+        );
+        require(
+            transactions[_id].status == Status.CONFIRMED, 
+            "Transaction need to be confirmed before being able to withdraw"
+        );
+
+        Transaction storage transaction = transactions[_id];
+
+        transaction.status = Status.WITHDRAWN;
+
+        (bool success, ) = transaction.receiver.call{value: transaction.amount}("");
+        require(success, "Transfer failed");
+
+        //ADD EVENT FOR WITHDRAWALS
     }
 
 }

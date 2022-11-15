@@ -63,7 +63,7 @@ contract Escrow {
         //ADD EVENT FOR SENDER CONFIRMATION
     }
 
-    function Withdraw(uint256 _id) external {
+    function Withdraw(uint256 _id) external payable {
 
         require(
             msg.sender == transactions[_id].receiver, 
@@ -82,6 +82,49 @@ contract Escrow {
         require(success, "Transfer failed");
 
         //ADD EVENT FOR WITHDRAWALS
+    }
+
+    function Dispute(uint256 _id) external {
+        
+        Transaction storage transaction = transactions[_id];
+
+        if(msg.sender != transaction.sender) {
+
+            require(
+                msg.sender == transaction.receiver,
+                "Only sender or receiver can dispute a transaction"
+            );
+
+        } else {
+
+            require(
+                transaction.status == Status.PENDING,
+                "Confirmed or completed transactions cannot be disputed"
+            );
+
+            transaction.status = Status.DISPUTED;
+
+        }
+
+        //ADD EVENT FOR DISPUTED TRANSACTION
+    }
+
+    //ADD A ONLY ADMIN AND OWNER MODIFIER
+    function Refund(uint256 _id) external payable {
+        
+        Transaction storage transaction = transactions[_id];
+
+        require(
+            transaction.status == Status.DISPUTED,
+            "Only disputed transactions can be refunded by an admin"    
+        );
+
+        transaction.status = Status.REFUNDED;
+
+        (bool success, ) = transaction.sender.call{value: transaction.amount}("");
+        require(success, "Transaction failed");
+
+        //ADD EVENT FOR REFUNDED TRANSACTIONS
     }
 
 }

@@ -7,6 +7,22 @@ contract Escrow {
 
     uint256 public txid = 1;
 
+    event TransactionCreated(
+
+        address indexed sender,
+        address indexed receiver,
+        uint256 txid
+
+    );
+
+    event TransactionConfirmed(
+
+        address indexed sender,
+        address indexed receiver,
+        uint256 txid
+
+    );
+
     enum Status { PENDING, CONFIRMED, WITHDRAWN, DISPUTED, REFUNDED, RELEASED }
 
     struct Transaction {
@@ -43,38 +59,40 @@ contract Escrow {
 
         txid ++;
 
-        //ADD EVENT FOR ESCROW CREATION
+        emit TransactionCreated(msg.sender, _receiver, txid);
     }
 
     function Confirm(uint256 _id) external {
 
+        Transaction storage transaction = transactions[_id];
+        
         //TRANSFORM INTO A MODIFIER?
         require(
-            msg.sender == transactions[_id].sender, 
+            msg.sender == transaction.sender, 
             "Transactions can only be confirmed by the sender"
         );
         require(
-            transactions[_id].status == Status.PENDING,
+            transaction.status == Status.PENDING,
             "Transaction needs to be pending so it can be confirmed"
         );
 
-        transactions[_id].status = Status.CONFIRMED;
+        transaction.status = Status.CONFIRMED;
 
-        //ADD EVENT FOR SENDER CONFIRMATION
+        emit TransactionConfirmed(msg.sender, transaction.receiver, txid);
     }
 
     function Withdraw(uint256 _id) external payable {
 
+        Transaction storage transaction = transactions[_id];
+
         require(
-            msg.sender == transactions[_id].receiver, 
+            msg.sender == transaction.receiver, 
             "Transactions can only be withdrawn by established receiver"
         );
         require(
-            transactions[_id].status == Status.CONFIRMED, 
+            transaction.status == Status.CONFIRMED, 
             "Transaction need to be confirmed before being able to withdraw"
         );
-
-        Transaction storage transaction = transactions[_id];
 
         transaction.status = Status.WITHDRAWN;
 

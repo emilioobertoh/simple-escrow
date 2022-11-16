@@ -127,4 +127,43 @@ contract Escrow {
         //ADD EVENT FOR REFUNDED TRANSACTIONS
     }
 
+    //ADD ONLY ADMIN AND OWNER MODIFIER
+    function Release(uint256 _id) external payable {
+
+        Transaction storage transaction = transactions[_id];
+
+        require(
+            transaction.status == Status.DISPUTED,
+            "Only disputed transactions can be released by an admin"    
+        );
+
+        transaction.status = Status.RELEASED;
+
+        (bool success, ) = transaction.receiver.call{value: transaction.amount}("");
+        require(success, "Transaction failed");
+
+        //ADD EVENT FOR REFUNDED TRANSACTIONS
+
+    }
+
+    //ADD MODIFIER FOR OWNER ONLY
+    function AddAdmin(address _admin) external {
+
+        require(!admins[_admin], "Admin already exist");
+
+        admins[_admin] = true;
+
+        //ADD EVENT FOR ADMIN LISTING
+    }
+
+    //ADD MODIFIER FOR OWNER ONLY
+    function DeleteAdmin(address _admin) external {
+        
+        require(admins[_admin], "Can delete only listed admins");
+
+        delete admins[_admin];
+
+        //ADD EVENT FOR ADMIN DELETION
+    }
+
 }

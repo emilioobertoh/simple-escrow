@@ -7,11 +7,14 @@ contract Escrow {
 
     uint256 public txid = 1;
 
+    enum Status { PENDING, CONFIRMED, WITHDRAWN, DISPUTED, REFUNDED, RELEASED }
+
     event TransactionCreated(
 
         address indexed sender,
         address indexed receiver,
-        uint256 txid
+        uint256 txid,
+        uint256 amount
 
     );
 
@@ -19,11 +22,38 @@ contract Escrow {
 
         address indexed sender,
         address indexed receiver,
-        uint256 txid
+        uint256 txid,
+        uint256 amount
 
     );
 
-    enum Status { PENDING, CONFIRMED, WITHDRAWN, DISPUTED, REFUNDED, RELEASED }
+    event TransactionWithdrawn(
+
+        address indexed sender,
+        address indexed receiver,
+        uint256 txid,
+        uint256 amount 
+
+    );
+
+    event TransactionDisputed(
+
+        address indexed sender,
+        address indexed receiver,
+        uint256 txid,
+        uint256 amount 
+
+    );
+    
+    event TransactionRefunded(
+
+        address indexed admin,
+        address indexed sender,
+        address indexed receiver,
+        uint256 txid,
+        uint256 amount 
+
+    );
 
     struct Transaction {
         
@@ -59,7 +89,7 @@ contract Escrow {
 
         txid ++;
 
-        emit TransactionCreated(msg.sender, _receiver, txid);
+        emit TransactionCreated(msg.sender, _receiver, txid, msg.value);
     }
 
     function Confirm(uint256 _id) external {
@@ -78,7 +108,7 @@ contract Escrow {
 
         transaction.status = Status.CONFIRMED;
 
-        emit TransactionConfirmed(msg.sender, transaction.receiver, txid);
+        emit TransactionConfirmed(msg.sender, transaction.receiver, txid, transaction.amount);
     }
 
     function Withdraw(uint256 _id) external payable {
@@ -99,7 +129,7 @@ contract Escrow {
         (bool success, ) = transaction.receiver.call{value: transaction.amount}("");
         require(success, "Transfer failed");
 
-        //ADD EVENT FOR WITHDRAWALS
+        emit TransactionWithdrawn(transaction.sender, transaction.receiver, txid, transaction.amount);
     }
 
     function Dispute(uint256 _id) external {
@@ -124,7 +154,7 @@ contract Escrow {
 
         }
 
-        //ADD EVENT FOR DISPUTED TRANSACTION
+        emit TransactionDisputed(transaction.sender, transaction.receiver, txid, transaction.amount);
     }
 
     //ADD A ONLY ADMIN AND OWNER MODIFIER
@@ -142,7 +172,7 @@ contract Escrow {
         (bool success, ) = transaction.sender.call{value: transaction.amount}("");
         require(success, "Transaction failed");
 
-        //ADD EVENT FOR REFUNDED TRANSACTIONS
+        emit TransactionRefunded(msg.sender, transaction.sender, transaction.receiver, txid, transaction.amount);
     }
 
     //ADD ONLY ADMIN AND OWNER MODIFIER

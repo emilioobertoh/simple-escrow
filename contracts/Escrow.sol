@@ -90,6 +90,28 @@ contract Escrow {
         
     );
 
+    modifier onlyAuthorized() {
+        
+        if(msg.sender != owner) {
+
+            require(admins[msg.sender], "Unauthorized address" );
+            _;
+
+        } else {
+
+            _;
+
+        }
+
+    }
+
+    modifier onlyOwner() {
+
+        require(msg.sender == owner, "Unauthorized address");
+        _;
+
+    }
+
     constructor() {
 
         owner = payable(msg.sender);
@@ -222,8 +244,7 @@ contract Escrow {
 
     }
 
-    //ADD A ONLY ADMIN AND OWNER MODIFIER
-    function Refund(uint256 _id) external payable {
+    function Refund(uint256 _id) external payable onlyAuthorized {
         
         Transaction storage transaction = transactions[_id];
 
@@ -249,8 +270,7 @@ contract Escrow {
 
     }
 
-    //ADD ONLY ADMIN AND OWNER MODIFIER
-    function Release(uint256 _id) external payable {
+    function Release(uint256 _id) external payable onlyAuthorized {
 
         Transaction storage transaction = transactions[_id];
 
@@ -276,8 +296,7 @@ contract Escrow {
 
     }
 
-    //ADD MODIFIER FOR OWNER ONLY
-    function AddAdmin(address _admin) external {
+    function AddAdmin(address _admin) external onlyOwner {
 
         require(!admins[_admin], "Admin already exist");
 
@@ -290,8 +309,7 @@ contract Escrow {
         );
     }
 
-    //ADD MODIFIER FOR OWNER ONLY
-    function DeleteAdmin(address _admin) external {
+    function DeleteAdmin(address _admin) external onlyOwner {
         
         require(admins[_admin], "Can delete only listed admins");
 

@@ -1,7 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Escrow {
+import "@openzeppelin/contracts/security/Pausable.sol";
+
+contract Escrow is Pausable {
     
     address payable public owner;
 
@@ -118,7 +120,7 @@ contract Escrow {
 
     }
 
-    function Deposit(address _receiver) external payable {
+    function deposit(address _receiver) external payable whenNotPaused {
 
         require(_receiver != address(0), "Cannot escrow funds to zero address");
 
@@ -144,7 +146,7 @@ contract Escrow {
 
     }
 
-    function Confirm(uint256 _id) external {
+    function confirm(uint256 _id) external whenNotPaused {
 
         Transaction storage transaction = transactions[_id];
         
@@ -170,7 +172,7 @@ contract Escrow {
 
     }
 
-    function Withdraw(uint256 _id) external payable {
+    function withdraw(uint256 _id) external payable whenNotPaused {
 
         Transaction storage transaction = transactions[_id];
 
@@ -198,7 +200,7 @@ contract Escrow {
         );
     }
 
-    function Dispute(uint256 _id) external {
+    function dispute(uint256 _id) external whenNotPaused {
         
         Transaction storage transaction = transactions[_id];
 
@@ -244,7 +246,7 @@ contract Escrow {
 
     }
 
-    function Refund(uint256 _id) external payable onlyAuthorized {
+    function refund(uint256 _id) external payable onlyAuthorized whenNotPaused {
         
         Transaction storage transaction = transactions[_id];
 
@@ -270,7 +272,7 @@ contract Escrow {
 
     }
 
-    function Release(uint256 _id) external payable onlyAuthorized {
+    function release(uint256 _id) external payable onlyAuthorized whenNotPaused {
 
         Transaction storage transaction = transactions[_id];
 
@@ -296,7 +298,7 @@ contract Escrow {
 
     }
 
-    function AddAdmin(address _admin) external onlyOwner {
+    function addAdmin(address _admin) external onlyOwner whenNotPaused {
 
         require(!admins[_admin], "Admin already exist");
 
@@ -309,7 +311,7 @@ contract Escrow {
         );
     }
 
-    function DeleteAdmin(address _admin) external onlyOwner {
+    function deleteAdmin(address _admin) external onlyOwner whenNotPaused{
         
         require(admins[_admin], "Can delete only listed admins");
 
@@ -321,6 +323,18 @@ contract Escrow {
             
         );
         
+    }
+
+    function pause() public onlyOwner {
+
+        _pause();
+
+    }
+
+    function unpause() public onlyOwner {
+
+        _unpause();
+
     }
 
 }

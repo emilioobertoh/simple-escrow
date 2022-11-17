@@ -55,6 +55,29 @@ contract Escrow {
 
     );
 
+    event TransactionReleased(
+
+        address indexed admin,
+        address indexed sender,
+        address indexed receiver,
+        uint256 txid,
+        uint256 amount 
+
+    );
+
+    event AdminAdded(
+
+        address indexed addedAdmin
+
+    );
+
+    event AdminDeleted(
+
+        address indexed addedAdmin
+        
+    );
+
+
     struct Transaction {
         
         address sender;
@@ -190,7 +213,7 @@ contract Escrow {
         (bool success, ) = transaction.receiver.call{value: transaction.amount}("");
         require(success, "Transaction failed");
 
-        //ADD EVENT FOR REFUNDED TRANSACTIONS
+        emit TransactionReleased(msg.sender, transaction.sender, transaction.receiver, txid, transaction.amount);
 
     }
 
@@ -201,7 +224,7 @@ contract Escrow {
 
         admins[_admin] = true;
 
-        //ADD EVENT FOR ADMIN LISTING
+        emit AdminAdded(_admin);
     }
 
     //ADD MODIFIER FOR OWNER ONLY
@@ -211,7 +234,7 @@ contract Escrow {
 
         delete admins[_admin];
 
-        //ADD EVENT FOR ADMIN DELETION
+        emit AdminDeleted(_admin);
     }
 
 }

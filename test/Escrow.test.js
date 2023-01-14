@@ -20,9 +20,9 @@ describe("Escrow", async function () {
     
         })
 
-        describe("addAdmin function", function () {
+        describe("addAdmin and deleteAdmin functions", function () {
 
-            it("only owner can call the function", async function () {
+            it("only owner can call the addAdmin function", async function () {
 
                 //gets an array of all accounts
                 const [owner, acc1, acc2] = await ethers.getSigners();
@@ -34,7 +34,19 @@ describe("Escrow", async function () {
 
             })
 
-            it("a new admin can be listed and cannot list and existing admin", async function () {
+            it("only owner can call the deleteAdmin function", async function () {
+
+                //gets an array of all accounts
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+        
+                await expect(escrow.connect(acc1).deleteAdmin(acc2.address)).to.be.revertedWith("Unauthorized address");    
+
+            })
+
+            it("a new admin can be listed/deleted and cannot list/delete an existing/non existing admin", async function () {
 
                 const [owner, acc1, acc2] = await ethers.getSigners();
 
@@ -45,9 +57,37 @@ describe("Escrow", async function () {
                 
                 expect(await escrow.admins(acc2.address)).to.equal(true);
 
-                await expect(escrow.addAdmin(acc2.address)).to.be.revertedWith("Admin already exist");    
+                await expect(escrow.addAdmin(acc2.address)).to.be.revertedWith("Admin already exist"); 
+                
+                await escrow.deleteAdmin(acc2.address);
+
+                expect(await escrow.admins(acc2.address)).to.equal(false);
+
+                await expect(escrow.deleteAdmin(acc2.address)).to.be.revertedWith("Can delete only listed admins"); 
 
             })
+
+        })
+
+        describe("Pause/Unpause functionality", function () {
+
+            it("Only owner is able to pause the contract", async function () {
+
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+
+                expect(await escrow.paused()).to.be.equal(false);
+    
+                await expect(escrow.connect(acc1).pause()).to.be.revertedWith("Unauthorized address");
+
+                await escrow.pause();
+
+                expect(await escrow.paused()).to.be.equal(true);
+    
+            })
+
 
         })
         

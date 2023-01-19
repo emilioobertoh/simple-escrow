@@ -103,6 +103,18 @@ describe("Escrow", async function () {
 
                 await expect(escrow.connect(acc2).withdraw(1)).to.be.revertedWith("Pausable: paused");
 
+                await expect(escrow.dispute(1)).to.be.revertedWith("Pausable: paused");
+
+                await expect(escrow.refund(1)).to.be.revertedWith("Pausable: paused");
+
+                await expect(escrow.release(1)).to.be.revertedWith("Pausable: paused");
+
+                await expect(escrow.addAdmin(acc2.address)).to.be.revertedWith("Pausable: paused");
+
+                await expect(escrow.deleteAdmin(acc2.address)).to.be.revertedWith("Pausable: paused");
+
+                await expect(escrow.pause()).to.be.revertedWith("Pausable: paused");
+
             })
 
 

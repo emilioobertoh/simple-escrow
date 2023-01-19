@@ -88,6 +88,23 @@ describe("Escrow", async function () {
     
             })
 
+            it("Functions cannot be called while contract is paused", async function () {
+
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+
+                await escrow.pause();
+
+                await expect(escrow.deposit(acc2.address)).to.be.revertedWith("Pausable: paused");
+
+                await expect(escrow.confirm(1)).to.be.revertedWith("Pausable: paused");
+
+                await expect(escrow.connect(acc2).withdraw(1)).to.be.revertedWith("Pausable: paused");
+
+            })
+
 
         })
         

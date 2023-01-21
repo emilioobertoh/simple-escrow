@@ -3,6 +3,7 @@ const { expect } = require("chai");
 const hre = require("hardhat");
 const { time } = require("@nomicfoundation/hardhat-network-helpers");
 const { ethers } = require("hardhat");
+const { constants, expectRevert } = require('@openzeppelin/test-helpers');
 
 describe("Escrow", async function () {
 
@@ -117,9 +118,61 @@ describe("Escrow", async function () {
 
             })
 
-
         })
-        
+
+    })
+
+    describe("Testing basic functionality", function () {
+
+        describe("Deposit function tests", async function () {
+
+            it("Cannot make a deposit to Zero address", async function () {
+
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+
+                await expect(escrow.deposit(constants.ZERO_ADDRESS))
+                    .to.be.revertedWith("Cannot escrow funds to zero address");
+
+            })
+
+            it("Can be called by a user and a deposit can be made", async function () {
+
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+
+                await expect(escrow.connect(acc1).deposit(acc2.address, { value: 1000 }))
+                    .to.changeEtherBalances([acc1.address, escrow.address], [-1000, 1000]);
+
+            })
+
+            it("Creates transaction in mapping, txid is incremented and status is properly set up", async function () {
+
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+
+                await escrow.connect(acc1).deposit(acc2.address, { value: 1000 });
+
+                const tx = await escrow.transactions(1);
+
+                expect(tx.sender).to.be.equal(acc1.address);
+
+                expect(tx.receiver).to.be.equal(acc2.address);
+
+                expect(tx.status).to.be.equal(0);
+
+                expect(tx.amount).to.be.equal(1000);
+
+                expect(await escrow.txid()).to.be.equal(2);
+
+            })
+        })
     })
 
 })

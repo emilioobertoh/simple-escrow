@@ -201,6 +201,34 @@ describe("Escrow", async function () {
             it("Transaction status is changed to CONFIRMED upon confirmation", function() {})
 
         })
+
+        describe("Withdraw function tests", async function () {
+
+            it("Can only be called by receiver, status is changed to WITHDRAWN and balance changes are done", async function () {
+                
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+
+                await escrow.connect(acc1).deposit(acc2.address, { value: 1000 });
+
+                await escrow.connect(acc1).confirm(1);
+
+                await expect(escrow.withdraw(1)).to.be.revertedWith("Transactions can only be withdrawn by established receiver");
+
+                await expect(escrow.connect(acc2).withdraw(1))
+                    .to.changeEtherBalances([escrow.address, acc2.address], [-1000, 1000]);;
+
+                const status = await escrow.transactions(1);
+
+                await expect(status.status).to.be.equal(2);
+
+                await expect(escrow.connect(acc2).withdraw(1)).to.be.revertedWith("Transaction need to be confirmed before being able to withdraw");
+
+                //ADD A TEST FOR FUNCTION TO BE REVERTED WHEN TRANSACTION FAILS 
+            })
+        })
     })
 
 })

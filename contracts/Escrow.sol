@@ -11,7 +11,7 @@ contract Escrow is Pausable {
 
     enum Status { PENDING, CONFIRMED, WITHDRAWN, DISPUTED, REFUNDED, RELEASED }
 
-        struct Transaction {
+    struct Transaction {
         
         address sender;
         address receiver;
@@ -149,6 +149,9 @@ contract Escrow is Pausable {
     function confirm(uint256 _id) external whenNotPaused {
 
         Transaction storage transaction = transactions[_id];
+
+        /* ADD A WAY OF SHOWING WHEN THE TRANSACTION IS BEING REVERTED
+        DUE TO NON EXISTING ID */
         
         require(
             msg.sender == transaction.sender, 

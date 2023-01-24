@@ -173,6 +173,34 @@ describe("Escrow", async function () {
 
             })
         })
+
+        describe("Confirm function tests", function () {
+
+            it("Can only be confirmed by SENDER", async function () {
+
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+
+                await escrow.connect(acc1).deposit(acc2.address, { value: 1000 });
+
+                await expect(escrow.confirm(1)).to.be.revertedWith("Transactions can only be confirmed by the sender");
+
+                await escrow.connect(acc1).confirm(1);
+
+                await expect(escrow.connect(acc1).confirm(1)).to.be.revertedWith("Transaction needs to be pending so it can be confirmed");
+
+                const status = await escrow.transactions(1);
+
+                await expect(status.status).to.be.equal(1);
+
+            })
+
+            it("Can only be confirmed while on PENDING status", function() {})
+            it("Transaction status is changed to CONFIRMED upon confirmation", function() {})
+
+        })
     })
 
 })

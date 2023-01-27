@@ -197,7 +197,7 @@ describe("Escrow", async function () {
 
             })
 
-            
+
             //COMMENT THESE TESTS ON PREVIOUS BLOCK OF CODE
             it("Can only be confirmed while on PENDING status", function() {
 
@@ -263,7 +263,7 @@ describe("Escrow", async function () {
 
             it("Can only be called by sender or receiver, and status is changed upon execution", async function () {
 
-                const [owner, acc1, acc2] = await ethers.getSigners();
+                const [owner, acc1, acc2, acc3] = await ethers.getSigners();
 
                 const Escrow = await hre.ethers.getContractFactory("Escrow");
                 const escrow = await Escrow.deploy();
@@ -273,22 +273,64 @@ describe("Escrow", async function () {
                 await expect(escrow.dispute(1))
                     .to.be.revertedWith("Only sender or receiver can dispute a transaction");
 
+
+                /*Tests if the function can only be called while on DISPUTED status, 
+                intended for Refund function tests*/
+                await expect(escrow.refund(1))
+                    .to.be.revertedWith("Only disputed transactions can be refunded by an admin");
+
+
                 await escrow.connect(acc2).dispute(1);
 
-                const status = await escrow.transactions(1);
+                let status = await escrow.transactions(1);
 
                 await expect(status.status).to.be.equal(3);
 
-                /*Tests intended for Refund function tests*/
+                /*Tests if the function can only be called by an admin or contract owner, 
+                intended for Refund function tests*/
+                await expect(escrow.connect(acc2).refund(1)).to.be.revertedWith("Unauthorized address");
 
-                
+                /*Tests if the transaction status is changed upon execution, 
+                intended for Refund function tests*/
+                await escrow.addAdmin(acc3.address);
+
+                await expect(escrow.connect(acc3).refund(1))
+                    .to.changeEtherBalances([escrow.address, acc1], [-1000, 1000]);
+
+                status = await escrow.transactions(1);
+
+                await expect(status.status).to.be.equal(4);
+
 
             })
 
         })
 
         describe("Refund function tests", function () {
+            
+            it("Can only be called by an admin or Owner", async function () {
 
+                //TESTED ON PREVIOUS BLOCK OF CODE
+
+            })
+
+            it("Can only be called while on DISPUTED status", async function () {
+
+                //TESTED ON PREVIOUS BLOCK OF CODE
+
+            })
+
+            it("Status is changed to REFUNDED upon execution", async function () {
+
+                //TESTED ON PREVIOUS BLOCK OF CODE
+
+            })
+
+            it("Balance is REFUNDED to sender and is subtracted from contract balance", async function () {
+
+                //TESTED ON PREVIOUS BLOCK OF CODE
+
+            })
 
         })
     })

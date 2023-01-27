@@ -197,8 +197,19 @@ describe("Escrow", async function () {
 
             })
 
-            it("Can only be confirmed while on PENDING status", function() {})
-            it("Transaction status is changed to CONFIRMED upon confirmation", function() {})
+            
+            //COMMENT THESE TESTS ON PREVIOUS BLOCK OF CODE
+            it("Can only be confirmed while on PENDING status", function() {
+
+                //TESTED ON PREVIOUS BLOCK OF CODE
+
+            })
+
+            it("Transaction status is changed to CONFIRMED upon confirmation", function() {
+
+                //TESTED ON PREVIOUS BLOCK OF CODE
+
+            })
 
         })
 
@@ -215,7 +226,19 @@ describe("Escrow", async function () {
 
                 await escrow.connect(acc1).confirm(1);
 
+
+                /*Tests if the function reverts when called after it is already confirmed, 
+                intended for Dispute function tests*/
+                await expect(escrow.connect(acc1).dispute(1)).to.be.revertedWith("Confirmed or completed transactions cannot be disputed");
+
+
                 await expect(escrow.withdraw(1)).to.be.revertedWith("Transactions can only be withdrawn by established receiver");
+
+
+                /*Tests if the function reverts when called after it is already withdrawn, 
+                intended for Dispute function tests*/
+                await expect(escrow.connect(acc1).dispute(1)).to.be.revertedWith("Confirmed or completed transactions cannot be disputed");
+
 
                 await expect(escrow.connect(acc2).withdraw(1))
                     .to.changeEtherBalances([escrow.address, acc2.address], [-1000, 1000]);;
@@ -228,6 +251,45 @@ describe("Escrow", async function () {
 
                 //ADD A TEST FOR FUNCTION TO BE REVERTED WHEN TRANSACTION FAILS 
             })
+        })
+
+        describe("Dispute function tests", function () {
+
+            it("Can only be called while on PENDING status", async function () {
+
+                //TESTED ON PREVIOUS BLOCK OF CODE
+
+            })
+
+            it("Can only be called by sender or receiver, and status is changed upon execution", async function () {
+
+                const [owner, acc1, acc2] = await ethers.getSigners();
+
+                const Escrow = await hre.ethers.getContractFactory("Escrow");
+                const escrow = await Escrow.deploy();
+
+                await escrow.connect(acc1).deposit(acc2.address, { value: 1000 });
+
+                await expect(escrow.dispute(1))
+                    .to.be.revertedWith("Only sender or receiver can dispute a transaction");
+
+                await escrow.connect(acc2).dispute(1);
+
+                const status = await escrow.transactions(1);
+
+                await expect(status.status).to.be.equal(3);
+
+                /*Tests intended for Refund function tests*/
+
+                
+
+            })
+
+        })
+
+        describe("Refund function tests", function () {
+
+
         })
     })
 

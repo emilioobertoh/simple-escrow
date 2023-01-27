@@ -215,7 +215,7 @@ contract Escrow is Pausable {
             );
             require(
                 transaction.status == Status.PENDING,
-                "Confirmed or completed transactions cannot be disputed"
+                "Confirmed or withdrawn transactions cannot be disputed"
             );
 
             transaction.status = Status.DISPUTED;

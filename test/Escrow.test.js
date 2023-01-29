@@ -87,9 +87,22 @@ describe("Escrow", async function () {
     
                 await expect(escrow.connect(acc1).pause()).to.be.revertedWith("Unauthorized address");
 
-                await escrow.pause();
+                await expect(escrow.pause())
+                    .to.emit(escrow, "Paused")
+                    .withArgs(
+                        owner.address
+                    );
 
                 expect(await escrow.paused()).to.be.equal(true);
+
+                await expect(escrow.unpause())
+                    .to.emit(escrow, "Unpaused")
+                    .withArgs(
+                        owner.address
+                    );
+
+                expect(await escrow.paused()).to.be.equal(false);
+
     
             })
 

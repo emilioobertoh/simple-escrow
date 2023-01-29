@@ -229,27 +229,30 @@ describe("Escrow", async function () {
 
                 /*Tests if the function reverts when called after it is already confirmed, 
                 intended for Dispute function tests*/
-                await expect(escrow.connect(acc1).dispute(1)).to.be.revertedWith("Confirmed or completed transactions cannot be disputed");
+                await expect(escrow.connect(acc1).dispute(1))
+                    .to.be.revertedWith("Confirmed or completed transactions cannot be disputed");
 
 
-                await expect(escrow.withdraw(1)).to.be.revertedWith("Transactions can only be withdrawn by established receiver");
+                await expect(escrow.withdraw(1))
+                    .to.be.revertedWith("Transactions can only be withdrawn by established receiver");
 
 
                 /*Tests if the function reverts when called after it is already withdrawn, 
                 intended for Dispute function tests*/
-                await expect(escrow.connect(acc1).dispute(1)).to.be.revertedWith("Confirmed or completed transactions cannot be disputed");
+                await expect(escrow.connect(acc1).dispute(1))
+                    .to.be.revertedWith("Confirmed or completed transactions cannot be disputed");
 
 
                 await expect(escrow.connect(acc2).withdraw(1))
-                    .to.changeEtherBalances([escrow.address, acc2.address], [-1000, 1000]);;
+                    .to.changeEtherBalances([escrow.address, acc2.address], [-1000, 1000]);
 
                 const status = await escrow.transactions(1);
 
                 await expect(status.status).to.be.equal(2);
 
-                await expect(escrow.connect(acc2).withdraw(1)).to.be.revertedWith("Transaction need to be confirmed before being able to withdraw");
-
-                //ADD A TEST FOR FUNCTION TO BE REVERTED WHEN TRANSACTION FAILS 
+                await expect(escrow.connect(acc2).withdraw(1))
+                    .to.be.revertedWith("Transaction need to be confirmed before being able to withdraw");
+ 
             })
         })
 
@@ -309,7 +312,6 @@ describe("Escrow", async function () {
                 status = await escrow.transactions(1);
 
                 await expect(status.status).to.be.equal(4);
-
 
             })
 

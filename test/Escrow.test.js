@@ -339,7 +339,15 @@ describe("Escrow", async function () {
                 await escrow.addAdmin(acc3.address);
 
                 await expect(escrow.connect(acc3).refund(1))
-                    .to.changeEtherBalances([escrow.address, acc1], [-1000, 1000]);
+                    .to.changeEtherBalances([escrow.address, acc1], [-1000, 1000])
+                    .to.emit(escrow, "TransactionRefunded")
+                    .withArgs(
+                        acc3.address,
+                        acc1.address, 
+                        acc2.address,
+                        1,
+                        1000
+                    );
 
                 status = await escrow.transactions(1);
 
@@ -403,7 +411,15 @@ describe("Escrow", async function () {
                 await escrow.connect(acc2).dispute(1);
 
                 await expect(escrow.release(1))
-                    .to.changeEtherBalances([escrow.address, acc2], [-1000, 1000]);
+                    .to.changeEtherBalances([escrow.address, acc2], [-1000, 1000])
+                    .to.emit(escrow, "TransactionReleased")
+                    .withArgs(
+                        owner.address,
+                        acc1.address, 
+                        acc2.address,
+                        1,
+                        1000
+                    );
 
                 let status = await escrow.transactions(1);
 

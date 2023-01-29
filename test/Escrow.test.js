@@ -54,13 +54,17 @@ describe("Escrow", async function () {
                 const Escrow = await hre.ethers.getContractFactory("Escrow");
                 const escrow = await Escrow.deploy();
         
-                await escrow.addAdmin(acc2.address);
+                await expect(escrow.addAdmin(acc2.address))
+                    .to.emit(escrow, "AdminAdded")
+                    .withArgs(acc2.address);
                 
                 expect(await escrow.admins(acc2.address)).to.equal(true);
 
                 await expect(escrow.addAdmin(acc2.address)).to.be.revertedWith("Admin already exist"); 
                 
-                await escrow.deleteAdmin(acc2.address);
+                await expect(escrow.deleteAdmin(acc2.address))
+                    .to.emit(escrow, "AdminDeleted")
+                    .withArgs(acc2.address);
 
                 expect(await escrow.admins(acc2.address)).to.equal(false);
 
@@ -146,7 +150,14 @@ describe("Escrow", async function () {
                 const escrow = await Escrow.deploy();
 
                 await expect(escrow.connect(acc1).deposit(acc2.address, { value: 1000 }))
-                    .to.changeEtherBalances([acc1.address, escrow.address], [-1000, 1000]);
+                    .to.changeEtherBalances([acc1.address, escrow.address], [-1000, 1000])
+                    .to.emit(escrow, "TransactionCreated")
+                    .withArgs(
+                        acc1.address,
+                        acc2.address,
+                        1,
+                        1000
+                    );
 
             })
 
@@ -244,7 +255,14 @@ describe("Escrow", async function () {
 
 
                 await expect(escrow.connect(acc2).withdraw(1))
-                    .to.changeEtherBalances([escrow.address, acc2.address], [-1000, 1000]);
+                    .to.changeEtherBalances([escrow.address, acc2.address], [-1000, 1000])
+                    .to.emit(escrow, "TransactionWithdrawn")
+                    .withArgs(
+                        acc1.address, 
+                        acc2.address,
+                        1,
+                        1000
+                    );
 
                 const status = await escrow.transactions(1);
 

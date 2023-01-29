@@ -133,8 +133,6 @@ contract Escrow is Pausable {
 
         );
 
-        txid ++;
-
         emit TransactionCreated(
 
             msg.sender, 
@@ -143,6 +141,8 @@ contract Escrow is Pausable {
             msg.value
 
         );
+
+        txid ++;
 
     }
 
@@ -197,7 +197,7 @@ contract Escrow is Pausable {
 
             transaction.sender, 
             transaction.receiver, 
-            txid, 
+            _id, 
             transaction.amount
 
         );

@@ -168,7 +168,7 @@ contract Escrow is Pausable {
 
             msg.sender, 
             transaction.receiver, 
-            txid, 
+            _id, 
             transaction.amount
 
         );
@@ -224,7 +224,8 @@ contract Escrow is Pausable {
 
                 transaction.sender, 
                 transaction.receiver, 
-                txid, transaction.amount
+                _id, 
+                transaction.amount
 
             );
 
@@ -268,7 +269,7 @@ contract Escrow is Pausable {
             msg.sender, 
             transaction.sender, 
             transaction.receiver, 
-            txid, 
+            _id, 
             transaction.amount
 
         );
@@ -294,7 +295,7 @@ contract Escrow is Pausable {
             msg.sender, 
             transaction.sender, 
             transaction.receiver, 
-            txid, 
+            _id, 
             transaction.amount
 
         );

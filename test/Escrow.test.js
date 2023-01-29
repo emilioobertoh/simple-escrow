@@ -198,7 +198,14 @@ describe("Escrow", async function () {
 
                 await expect(escrow.confirm(1)).to.be.revertedWith("Transactions can only be confirmed by the sender");
 
-                await escrow.connect(acc1).confirm(1);
+                await expect(escrow.connect(acc1).confirm(1))
+                    .to.emit(escrow, "TransactionConfirmed")
+                    .withArgs(
+                        acc1.address,
+                        acc2.address,
+                        1,
+                        1000
+                    );
 
                 await expect(escrow.connect(acc1).confirm(1)).to.be.revertedWith("Transaction needs to be pending so it can be confirmed");
 
@@ -306,7 +313,14 @@ describe("Escrow", async function () {
                     .to.be.revertedWith("Only disputed transactions can be released by an admin");
 
 
-                await escrow.connect(acc2).dispute(1);
+                await expect(escrow.connect(acc2).dispute(1))
+                    .to.emit(escrow, "TransactionDisputed")
+                    .withArgs(
+                        acc1.address, 
+                        acc2.address,
+                        1,
+                        1000
+                    );
 
                 let status = await escrow.transactions(1);
 
